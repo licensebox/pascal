@@ -35,6 +35,7 @@ type
     function Call(const Operation: string; const ArgsJSON: string = '{}'): TJSONData;
     function Lease: TJSONData;
     function RequireModule(const Name: string): TJSONData;
+    function Heartbeat(const Name: string): TJSONData;
     function Status: TJSONData;
     function SignIn(Timeout: Double = 0): TJSONData;
     procedure Logout;
@@ -115,6 +116,9 @@ function TLicenseboxClient.Lease: TJSONData; begin Result:=Call('lease'); end;
 function TLicenseboxClient.RequireModule(const Name: string): TJSONData;
 var A: TJSONObject;
 begin A:=TJSONObject.Create(['module',Name]); try Result:=Call('require',A.AsJSON); finally A.Free; end; end;
+function TLicenseboxClient.Heartbeat(const Name: string): TJSONData;
+var A: TJSONObject;
+begin A:=TJSONObject.Create(['module',Name]); try Result:=Call('heartbeat',A.AsJSON); finally A.Free; end; end;
 function TLicenseboxClient.Status: TJSONData; begin Result:=Call('status'); end;
 function TLicenseboxClient.SignIn(Timeout: Double): TJSONData;
 var A: TJSONObject;

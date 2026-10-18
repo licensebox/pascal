@@ -22,6 +22,11 @@ begin
   if R.Find('binding')<>nil then CB.MachineBinding:=@BindingFn;
   C:=TLicenseboxClient.Create(O.AsJSON,CB);
   if Op='require' then Exit(C.RequireModule(R.Get('module','core')));
+  if (Op='heartbeat') or (Op='heartbeat-repeat') or (Op='heartbeat-after-require') then begin
+   if Op='heartbeat-after-require' then C.RequireModule('core').Free;
+   if Op='heartbeat-repeat' then C.Heartbeat(R.Get('module','core')).Free;
+   Exit(C.Heartbeat(R.Get('module','core')));
+  end;
   if Op='repeat' then begin C.RequireModule('core').Free; Exit(C.RequireModule('core')); end;
   if Op='sign_in' then Exit(C.SignIn(3));
   if Op='request' then Exit(C.RequestAccess(['export'],'café – test'));
