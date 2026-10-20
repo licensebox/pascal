@@ -2,7 +2,7 @@ unit Licensebox;
 {$mode objfpc}{$H+}
 interface
 uses cwstring, SysUtils, SyncObjs, fpjson, jsonparser;
-const LicenseboxSDKVersion = '0.2.0';
+const LicenseboxSDKVersion = '0.3.0';
 type
   ELicensebox = class(Exception)
     Code: string;
