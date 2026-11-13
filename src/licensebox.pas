@@ -2,7 +2,7 @@ unit Licensebox;
 {$mode objfpc}{$H+}
 interface
 uses cwstring, SysUtils, SyncObjs, fpjson, jsonparser;
-const LicenseboxSDKVersion = '0.3.0';
+const LicenseboxSDKVersion = '0.4.0';
 type
   ELicensebox = class(Exception)
     Code: string;
@@ -44,6 +44,12 @@ type
     function Requests: TJSONData;
     function RequestAccess(const Names: array of string; const Note: string = ''): TJSONData;
     function AccessLink: string;
+    { Service accounts and floating copies: RequireModule checks a floating
+      module out by itself; Checkin with no names returns every copy. The
+      options JSON may carry enrol_token (else LICENSEBOX_ENROL_TOKEN). }
+    function Enrol(const Token: string): TJSONData;
+    function Checkout(const Name: string): TJSONData;
+    procedure Checkin(const Names: array of string);
     procedure RecordUsage(const Command: string; Success: Boolean; Elapsed: Double);
   end;
 function DeriveBinding(const Product, Source, RawID: string): string;
@@ -133,6 +139,15 @@ begin N:=TJSONArray.Create; for S in Names do N.Add(S); A:=TJSONObject.Create; A
 function TLicenseboxClient.AccessLink: string;
 var A: TJSONData;
 begin A:=Call('access-link'); try Result:=A.AsString; finally A.Free; end; end;
+function TLicenseboxClient.Enrol(const Token: string): TJSONData;
+var A: TJSONObject;
+begin A:=TJSONObject.Create(['token',Token]); try Result:=Call('enrol',A.AsJSON); finally A.Free; end; end;
+function TLicenseboxClient.Checkout(const Name: string): TJSONData;
+var A: TJSONObject;
+begin A:=TJSONObject.Create(['module',Name]); try Result:=Call('checkout',A.AsJSON); finally A.Free; end; end;
+procedure TLicenseboxClient.Checkin(const Names: array of string);
+var A: TJSONObject; N: TJSONArray; S: string;
+begin N:=TJSONArray.Create; for S in Names do N.Add(S); A:=TJSONObject.Create; A.Add('modules',N); try Call('checkin',A.AsJSON).Free; finally A.Free; end; end;
 procedure TLicenseboxClient.RecordUsage(const Command: string; Success: Boolean; Elapsed: Double);
 var A: TJSONObject;
 begin A:=TJSONObject.Create; A.Add('command',Command); A.Add('success',Success); A.Add('elapsed',Elapsed); try Call('record',A.AsJSON).Free; finally A.Free; end; end;

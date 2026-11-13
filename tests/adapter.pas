@@ -18,6 +18,7 @@ begin
  try
   O.Add('product',Product); O.Add('keys',R.Objects['keys'].Clone); O.Add('server',R.Get('server','')); O.Add('directory',R.Get('directory','')); O.Add('version','conformance');
   if R.Find('ca_bundle')<>nil then O.Add('ca_bundle',R.Get('ca_bundle',''));
+  if R.Find('enrol_token')<>nil then O.Add('enrol_token',R.Get('enrol_token',''));
   FillChar(CB,SizeOf(CB),0); CB.Clock:=@ClockFn; CB.OnSignIn:=@SignInFn;
   if R.Find('binding')<>nil then CB.MachineBinding:=@BindingFn;
   C:=TLicenseboxClient.Create(O.AsJSON,CB);
@@ -29,6 +30,9 @@ begin
   end;
   if Op='repeat' then begin C.RequireModule('core').Free; Exit(C.RequireModule('core')); end;
   if Op='sign_in' then Exit(C.SignIn(3));
+  if Op='enrol' then Exit(C.Enrol(R.Get('token','')));
+  if Op='checkout' then Exit(C.Checkout(R.Get('module','')));
+  if Op='checkin' then begin C.Checkin([R.Get('module','')]); Exit(TJSONNull.Create); end;
   if Op='request' then Exit(C.RequestAccess(['export'],'café – test'));
   if Op='record' then begin C.RecordUsage('export',True,0.125); C.RecordUsage('export',False,0.025); Exit(TJSONNull.Create); end;
   Result:=C.Call(Op);
